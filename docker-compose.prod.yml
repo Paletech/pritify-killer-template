@@ -1,0 +1,17 @@
+version: '3.7'
+
+services:
+  api:
+    image: ${ECR_REGISTRY}/${ECR_REPOSITORY}:api
+    command: gunicorn app:app
+    restart: unless-stopped
+    env_file:
+      - .env
+
+  nginx:
+    image: ${ECR_REGISTRY}/${ECR_REPOSITORY}:nginx
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - api
