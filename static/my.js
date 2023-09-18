@@ -1,32 +1,32 @@
-$(".image-checkbox").each(function () {
-  if ($(this).find('input[type="checkbox"]').first().attr("checked")) {
-    $(this).addClass("image-checkbox-checked");
+$('.image-checkbox').each(function () {
+  if ($(this).find('input[type="checkbox"]').first().attr('checked')) {
+    $(this).addClass('image-checkbox-checked');
   } else {
-    $(this).removeClass("image-checkbox-checked");
+    $(this).removeClass('image-checkbox-checked');
   }
 });
 
 // sync the state to the input
-$(".image-checkbox").on("click", function (e) {
-  $(this).toggleClass("image-checkbox-checked");
+$('.image-checkbox').on('click', function (e) {
+  $(this).toggleClass('image-checkbox-checked');
   var $checkbox = $(this).find('input[type="checkbox"]');
-  $checkbox.prop("checked", !$checkbox.prop("checked"));
+  $checkbox.prop('checked', !$checkbox.prop('checked'));
 
   e.preventDefault();
 });
 
 $(document).ready(function () {
-  $("#overlay").hide();
+  $('#overlay').hide();
 
   const runPyScript = (image_path, overlay_image) => {
     return new Promise((resolve, reject) => {
       let formData = new FormData();
-      formData.append("overlay_image", overlay_image, overlay_image.name);
-      formData.append("image_path", image_path);
+      formData.append('overlay_image', overlay_image, overlay_image.name);
+      formData.append('image_path', image_path);
 
       $.ajax({
-        method: "POST",
-        url: "/change_image",
+        method: 'POST',
+        url: '/change_image',
         data: formData,
         processData: false,
         contentType: false,
@@ -41,41 +41,54 @@ $(document).ready(function () {
   };
 
   const addOverlay = async () => {
-    const selectedImage = document.getElementById("imageUpload").files[0];
+    const selectedImage = document.getElementById('imageUpload').files[0];
 
     if (selectedImage) {
-      $("#overlay").show();
+      $('#overlay').show();
 
-      let checkedImagesLabels = document.getElementsByClassName(
-        "image-checkbox-checked"
-      );
+      let checkedImagesLabels = document.getElementsByClassName('image-checkbox-checked');
 
       for (let i = 0; i < checkedImagesLabels.length; i++) {
-        let image = checkedImagesLabels[i].getElementsByTagName("img")[0];
+        let image = checkedImagesLabels[i].getElementsByTagName('img')[0];
         let imgSrc = image.src;
 
-        if (imgSrc.includes("?")) {
-          imgSrc = imgSrc.split("?")[0];
+        if (imgSrc.includes('?')) {
+          imgSrc = imgSrc.split('?')[0];
         }
-        console.log(imgSrc);
 
         try {
           const new_image_path = await runPyScript(imgSrc, selectedImage);
-          console.log(new_image_path);
 
           $(image).attr({
             src: `${new_image_path}?t=${new Date().getTime()}`,
           });
         } catch (error) {
-          console.error("Error fetching data:", error);
+          console.error('Error fetching data:', error);
         }
       }
 
-      $("#overlay").hide();
+      $('#overlay').hide();
     }
   };
 
-  $("#imageUpload").on("input", addOverlay);
-  $("#imagesUpdate").on("click", addOverlay);
-  $("#imagesReset").on("click", () => window.location.reload());
+  const updateLabel = (input) => {
+    const label = document.querySelector('label[for="imageUpload"]');
+    const fileNameSpan = document.getElementById('selectedFileName');
+
+    if (input.files[0]) {
+      const fileName = input.files[0].name;
+      label.textContent = `Print: ${fileName}`;
+      fileNameSpan.textContent = `Selected File: ${fileName}`;
+    } else {
+      label.textContent = 'Print image';
+      fileNameSpan.textContent = '';
+    }
+  };
+
+  $('#imageUpload').on('input', addOverlay);
+  $('#imageUpload').on('change', function () {
+    updateLabel(this);
+  });
+  $('#imagesUpdate').on('click', addOverlay);
+  $('#imagesReset').on('click', () => window.location.reload());
 });

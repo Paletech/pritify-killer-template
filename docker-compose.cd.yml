@@ -1,0 +1,16 @@
+version: '3.7'
+
+services:
+  api:
+    image: ${ECR_REGISTRY}/${ECR_REPOSITORY}:api
+    build:
+      context: .
+      dockerfile: ./docker/api/Dockerfile
+
+  nginx:
+    image: ${ECR_REGISTRY}/${ECR_REPOSITORY}:nginx
+    build:
+      context: .
+      dockerfile: ./docker/nginx/Dockerfile
+
+
